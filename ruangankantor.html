@@ -9,7 +9,7 @@
 <body class="bg-gray-100 text-gray-800 min-h-screen p-6">
 
   <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
-    <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Kantor</h1>
+    <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Perpustakaan</h1>
 
     <!-- Kolom Pencarian -->
     <div class="mb-4">
@@ -46,6 +46,12 @@
   let fullData = [];
   let currentPage = 1;
 
+  function formatRupiah(value) {
+    let number = parseFloat(value.toString().replace(/[^0-9.-]+/g, ""));
+    if (isNaN(number)) return value;
+    return "Rp. " + number.toLocaleString("id-ID");
+  }
+
   function displayTable(data, page = 1) {
     const tbody = document.getElementById('kirTableBody');
     tbody.innerHTML = '';
@@ -55,17 +61,23 @@
 
     pageData.forEach((row, idx) => {
       const tr = document.createElement('tr');
-      const fotoLink = row[6] ? `<a href="${row[6]}" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>` : '-';
+
+      const kodeBarang = row[0];
+      const fotoLink = kodeBarang 
+        ? `<a href="https://drive.google.com/drive/folders/1mmWlVQ37JJahR5avDHNreB6KHIXvzrJe" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>` 
+        : '-';
+
       const values = [
-        start + idx + 1,     // No.
-        row[0],              // Kode Barang (Kolom B)
-        row[1],              // Nama Barang (Kolom C)
-        row[2],              // Informasi Barang (Kolom D)
-        row[3],              // Tanggal Perolehan (Kolom E)
-        row[4],              // Harga Beli Perolehan (Kolom F)
-        row[5],              // Keadaan Barang (Kolom G)
-        fotoLink             // Link Foto Barang (kolom H)
+        start + idx + 1,
+        kodeBarang,
+        row[1],                          // Nama Barang
+        row[2],                          // Informasi
+        row[3],                          // Tanggal
+        formatRupiah(row[4]),           // Harga Beli
+        row[5],                          // Keadaan
+        fotoLink                         // Link ke folder foto
       ];
+
       tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
       tbody.appendChild(tr);
     });
@@ -117,17 +129,15 @@
     .then(text => {
       const json = JSON.parse(text.substr(47).slice(0, -2));
       const rows = json.table.rows;
-      // Ambil Kolom B-G => index 1-6
       fullData = rows.map(row => {
         const cells = row.c;
         return [
-          cells[1]?.v || '',  // B
-          cells[2]?.v || '',  // C
-          cells[3]?.v || '',  // D
-          cells[4]?.v || '',  // E
-          cells[5]?.v || '',  // F
-          cells[6]?.v || '',  // G
-          cells[6]?.v || ''   // H sebagai foto
+          cells[1]?.v || '',  // B - Kode Barang
+          cells[2]?.v || '',  // C - Nama
+          cells[3]?.v || '',  // D - Info
+          cells[4]?.v || '',  // E - Tanggal
+          cells[5]?.v || '',  // F - Harga
+          cells[6]?.v || ''   // G - Keadaan
         ];
       });
       displayTable(fullData, currentPage);
