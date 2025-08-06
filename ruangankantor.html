@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KIR : Ruangan Kantor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen p-6">
+
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Kantor</h1>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-200">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-3 py-2 text-sm border">No</th>
+            <th class="px-3 py-2 text-sm border">Nama Barang / Jenis</th>
+            <th class="px-3 py-2 text-sm border">Merk / Model</th>
+            <th class="px-3 py-2 text-sm border">Nomor Seri</th>
+            <th class="px-3 py-2 text-sm border">Jumlah</th>
+            <th class="px-3 py-2 text-sm border">Harga Perolehan</th>
+            <th class="px-3 py-2 text-sm border">Keadaan Barang</th>
+            <th class="px-3 py-2 text-sm border">Keterangan</th>
+          </tr>
+        </thead>
+        <tbody id="kirTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+<script>
+  const sheetID = '1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts';
+  const sheetName = 'KIR : RUANGAN KANTOR';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+
+  fetch(url)
+    .then(res => res.text())
+    .then(text => {
+      const json = JSON.parse(text.substr(47).slice(0, -2));
+      const rows = json.table.rows;
+      const tbody = document.getElementById('kirTableBody');
+
+      rows.forEach((row, idx) => {
+        const cells = row.c || [];
+        const tr = document.createElement('tr');
+
+        const values = [
+          idx + 1,
+          cells[0]?.v || '',
+          cells[1]?.v || '',
+          cells[2]?.v || '',
+          cells[3]?.v || '',
+          cells[4]?.v || '',
+          cells[5]?.v || '',
+          cells[6]?.v || ''
+        ];
+
+        tr.innerHTML = values
+          .map(val => `<td class="px-3 py-2 text-sm border">${val}</td>`)
+          .join('');
+        tbody.appendChild(tr);
+      });
+    })
+    .catch(err => {
+      console.error(err);
+      const tbody = document.getElementById('kirTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" class="px-3 py-2 text-center text-red-600">Gagal memuat data. Pastikan sheet sudah dipublikasi.</td></tr>';
+    });
+</script>
+
+</body>
+</html>
