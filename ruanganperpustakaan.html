@@ -5,164 +5,201 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>KIR : Ruangan Perpustakaan</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body class="bg-gray-100 text-gray-800 min-h-screen p-6">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex">
 
-  <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
-    <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Perpustakaan</h1>
+  <!-- Sidebar (Desktop) -->
+  <aside class="w-64 bg-blue-800 text-white flex-shrink-0 hidden md:block min-h-screen">
+    <div class="p-6 font-bold text-xl border-b border-blue-700">Inventaris SMPN 10</div>
+    <nav class="p-4 space-y-2">
+      <a href="ruangankantor.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Perpustakaan</a>
+      <a href="qrcode.html" class="block hover:bg-blue-700 px-4 py-2 rounded">QR CODE</a>
+    </nav>
+  </aside>
 
-    <!-- Kolom Pencarian -->
-    <div class="mb-4">
-      <input id="searchInput" type="text" placeholder="Cari barang..." class="w-full p-2 border rounded" onkeyup="filterTable()"/>
+  <!-- Konten Utama -->
+  <div class="flex-1 p-4">
+
+    <!-- Navbar Mobile -->
+    <header class="bg-blue-800 text-white w-full md:hidden mb-4 rounded">
+      <div class="flex items-center justify-between p-4">
+        <h1 class="text-lg font-bold">Inventaris SMPN 10</h1>
+        <button id="menu-btn" class="focus:outline-none">
+          <span class="material-icons">menu</span>
+        </button>
+      </div>
+      <div id="dropdown" class="hidden px-4 pb-4 space-y-2 bg-blue-700">
+        <a href="ruangankantor.html" class="block hover:text-blue-300">Ruangan Kantor</a>
+        <a href="ruanganperpustakaan.html" class="block hover:text-blue-300">Ruangan Perpustakaan</a>
+        <a href="qrcode.html" class="block hover:text-blue-300">QR CODE</a>
+      </div>
+    </header>
+
+    <!-- Konten KIR -->
+    <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
+      <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Perpustakaan</h1>
+
+      <!-- Kolom Pencarian -->
+      <div class="mb-4">
+        <input id="searchInput" type="text" placeholder="Cari barang..." class="w-full p-2 border rounded" onkeyup="filterTable()"/>
+      </div>
+
+      <!-- Tabel Data -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-300" id="asetTable">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="px-3 py-2 border">No</th>
+              <th class="px-3 py-2 border">Kode Barang</th>
+              <th class="px-3 py-2 border">Nama Barang</th>
+              <th class="px-3 py-2 border">Informasi Barang</th>
+              <th class="px-3 py-2 border">Tanggal Perolehan</th>
+              <th class="px-3 py-2 border">Harga Beli Perolehan</th>
+              <th class="px-3 py-2 border">Keadaan Barang</th>
+              <th class="px-3 py-2 border">Foto Barang</th>
+            </tr>
+          </thead>
+          <tbody id="kirTableBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex justify-between items-center mt-4" id="paginationControls"></div>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm border border-gray-300" id="asetTable">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="px-3 py-2 border">No</th>
-            <th class="px-3 py-2 border">Kode Barang</th>
-            <th class="px-3 py-2 border">Nama Barang</th>
-            <th class="px-3 py-2 border">Informasi Barang</th>
-            <th class="px-3 py-2 border">Tanggal Perolehan</th>
-            <th class="px-3 py-2 border">Harga Beli Perolehan</th>
-            <th class="px-3 py-2 border">Keadaan Barang</th>
-            <th class="px-3 py-2 border">Foto Barang</th>
-          </tr>
-        </thead>
-        <tbody id="kirTableBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex justify-between items-center mt-4" id="paginationControls"></div>
   </div>
 
-<script>
-  const sheetID = '1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts';
-  const sheetName = 'KIR : RUANGAN PERPUSTAKAAN';
-  const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
-  const rowsPerPage = 10;
-  let fullData = [];
-  let currentPage = 1;
+  <script>
+    const sheetID = '1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts';
+    const sheetName = 'KIR : RUANGAN PERPUSTAKAAN';
+    const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const rowsPerPage = 10;
+    let fullData = [];
+    let currentPage = 1;
 
-  function formatRupiah(value) {
-    let number = parseFloat(value.toString().replace(/[^0-9.-]+/g, ""));
-    if (isNaN(number)) return value;
-    return "Rp. " + number.toLocaleString("id-ID");
-  }
-
-  function formatTanggal(value) {
-    if (!value || !value.toString().includes("Date")) return value;
-    try {
-      const dateObj = new Date(value);
-      if (isNaN(dateObj)) return value;
-      return dateObj.toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      });
-    } catch {
-      return value;
+    function formatRupiah(value) {
+      let number = parseFloat(value.toString().replace(/[^0-9.-]+/g, ""));
+      if (isNaN(number)) return value;
+      return "Rp. " + number.toLocaleString("id-ID");
     }
-  }
 
-  function displayTable(data, page = 1) {
-    const tbody = document.getElementById('kirTableBody');
-    tbody.innerHTML = '';
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    const pageData = data.slice(start, end);
+    function formatTanggal(value) {
+      // Gunakan Date parsing untuk nilai Date Google Sheet
+      if (typeof value === "string" && value.startsWith("Date")) return value;
+      try {
+        const date = new Date(value);
+        if (isNaN(date)) return value;
+        return date.toLocaleDateString("id-ID", {
+          day: "2-digit", month: "2-digit", year: "numeric"
+        });
+      } catch {
+        return value;
+      }
+    }
 
-    pageData.forEach((row, idx) => {
-      const tr = document.createElement('tr');
-
-      const kodeBarang = row[0];
-      const fotoLink = kodeBarang 
-        ? `<a href="https://drive.google.com/drive/folders/1mmWlVQ37JJahR5avDHNreB6KHIXvzrJe" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>` 
-        : '-';
-
-      const values = [
-        start + idx + 1,
-        kodeBarang,
-        row[1],                        // Nama Barang
-        row[2],                        // Info Barang
-        formatTanggal(row[3]),        // Tanggal
-        formatRupiah(row[4]),         // Harga
-        row[5],                        // Keadaan
-        fotoLink                       // Link ke Drive
-      ];
-
-      tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
-      tbody.appendChild(tr);
-    });
-
-    renderPagination(data.length, page);
-  }
-
-  function renderPagination(totalItems, currentPage) {
-    const controls = document.getElementById('paginationControls');
-    const totalPages = Math.ceil(totalItems / rowsPerPage);
-    controls.innerHTML = '';
-
-    const prevBtn = document.createElement('button');
-    prevBtn.innerText = '← Sebelumnya';
-    prevBtn.disabled = currentPage === 1;
-    prevBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
-    prevBtn.onclick = () => {
-      currentPage--;
-      displayTable(fullData, currentPage);
-    };
-
-    const nextBtn = document.createElement('button');
-    nextBtn.innerText = 'Berikutnya →';
-    nextBtn.disabled = currentPage === totalPages;
-    nextBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
-    nextBtn.onclick = () => {
-      currentPage++;
-      displayTable(fullData, currentPage);
-    };
-
-    const info = document.createElement('span');
-    info.innerText = `Halaman ${currentPage} dari ${totalPages}`;
-    info.className = 'text-sm';
-
-    controls.appendChild(prevBtn);
-    controls.appendChild(info);
-    controls.appendChild(nextBtn);
-  }
-
-  function filterTable() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const filtered = fullData.filter(row => row.some(val => (val || '').toString().toLowerCase().includes(query)));
-    currentPage = 1;
-    displayTable(filtered, currentPage);
-  }
-
-  fetch(url)
-    .then(res => res.text())
-    .then(text => {
-      const json = JSON.parse(text.substr(47).slice(0, -2));
-      const rows = json.table.rows;
-      fullData = rows.map(row => {
-        const cells = row.c;
-        return [
-          cells[1]?.v || '',  // Kode Barang
-          cells[2]?.v || '',  // Nama
-          cells[3]?.v || '',  // Info
-          cells[4]?.f || cells[4]?.v || '',  // Tanggal (gunakan .f atau .v)
-          cells[5]?.v || '',  // Harga
-          cells[6]?.v || ''   // Keadaan
-        ];
-      });
-      displayTable(fullData, currentPage);
-    })
-    .catch(err => {
-      console.error(err);
+    function displayTable(data, page = 1) {
       const tbody = document.getElementById('kirTableBody');
-      tbody.innerHTML = '<tr><td colspan="8" class="px-3 py-2 text-center text-red-600">Gagal memuat data. Pastikan sheet sudah dipublikasi.</td></tr>';
+      tbody.innerHTML = '';
+      const start = (page - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageData = data.slice(start, end);
+
+      pageData.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        const fotoLink = row[0]
+          ? `<a href="https://drive.google.com/drive/folders/1mmWlVQ37JJahR5avDHNreB6KHIXvzrJe" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>`
+          : '-';
+
+        const values = [
+          start + idx + 1,
+          row[0],                     // Kode Barang
+          row[1],                     // Nama Barang
+          row[2],                     // Informasi
+          formatTanggal(row[3]),     // Tanggal
+          formatRupiah(row[4]),      // Harga
+          row[5],                     // Keadaan
+          fotoLink
+        ];
+
+        tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
+        tbody.appendChild(tr);
+      });
+
+      renderPagination(data.length, page);
+    }
+
+    function renderPagination(totalItems, currentPage) {
+      const controls = document.getElementById('paginationControls');
+      const totalPages = Math.ceil(totalItems / rowsPerPage);
+      controls.innerHTML = '';
+
+      const prevBtn = document.createElement('button');
+      prevBtn.innerText = '← Sebelumnya';
+      prevBtn.disabled = currentPage === 1;
+      prevBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
+      prevBtn.onclick = () => {
+        currentPage--;
+        displayTable(fullData, currentPage);
+      };
+
+      const nextBtn = document.createElement('button');
+      nextBtn.innerText = 'Berikutnya →';
+      nextBtn.disabled = currentPage === totalPages;
+      nextBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
+      nextBtn.onclick = () => {
+        currentPage++;
+        displayTable(fullData, currentPage);
+      };
+
+      const info = document.createElement('span');
+      info.innerText = `Halaman ${currentPage} dari ${totalPages}`;
+      info.className = 'text-sm';
+
+      controls.appendChild(prevBtn);
+      controls.appendChild(info);
+      controls.appendChild(nextBtn);
+    }
+
+    function filterTable() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = fullData.filter(row =>
+        row.some(val => (val || '').toString().toLowerCase().includes(query))
+      );
+      currentPage = 1;
+      displayTable(filtered, currentPage);
+    }
+
+    fetch(url)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        const rows = json.table.rows;
+        fullData = rows.map(row => {
+          const c = row.c;
+          return [
+            c[1]?.v || '',  // Kode
+            c[2]?.v || '',  // Nama
+            c[3]?.v || '',  // Info
+            c[4]?.f || c[4]?.v || '',  // Tanggal
+            c[5]?.v || '',  // Harga
+            c[6]?.v || ''   // Keadaan
+          ];
+        });
+        displayTable(fullData, currentPage);
+      })
+      .catch(err => {
+        console.error(err);
+        const tbody = document.getElementById('kirTableBody');
+        tbody.innerHTML = '<tr><td colspan="8" class="px-3 py-2 text-center text-red-600">Gagal memuat data. Pastikan sheet sudah dipublikasi.</td></tr>';
+      });
+
+    // Toggle dropdown menu (Mobile)
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('dropdown').classList.toggle('hidden');
     });
-</script>
+  </script>
 
 </body>
 </html>
