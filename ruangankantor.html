@@ -8,60 +8,129 @@
 </head>
 <body class="bg-gray-100 text-gray-800 min-h-screen p-6">
 
-  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-6">
+  <div class="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
     <h1 class="text-2xl font-bold mb-4 text-center">KIR : Ruangan Kantor</h1>
 
+    <!-- Kolom Pencarian -->
+    <div class="mb-4">
+      <input id="searchInput" type="text" placeholder="Cari barang..." class="w-full p-2 border rounded" onkeyup="filterTable()"/>
+    </div>
+
     <div class="overflow-x-auto">
-      <table class="min-w-full border border-gray-200">
+      <table class="min-w-full text-sm border border-gray-300" id="asetTable">
         <thead class="bg-gray-200">
           <tr>
-            <th class="px-3 py-2 text-sm border">No</th>
-            <th class="px-3 py-2 text-sm border">Nama Barang / Jenis</th>
-            <th class="px-3 py-2 text-sm border">Merk / Model</th>
-            <th class="px-3 py-2 text-sm border">Nomor Seri</th>
-            <th class="px-3 py-2 text-sm border">Jumlah</th>
-            <th class="px-3 py-2 text-sm border">Harga Perolehan</th>
-            <th class="px-3 py-2 text-sm border">Keadaan Barang</th>
-            <th class="px-3 py-2 text-sm border">Keterangan</th>
+            <th class="px-3 py-2 border">No</th>
+            <th class="px-3 py-2 border">Kode Barang</th>
+            <th class="px-3 py-2 border">Nama Barang</th>
+            <th class="px-3 py-2 border">Informasi Barang</th>
+            <th class="px-3 py-2 border">Tanggal Perolehan</th>
+            <th class="px-3 py-2 border">Harga Beli Perolehan</th>
+            <th class="px-3 py-2 border">Keadaan Barang</th>
+            <th class="px-3 py-2 border">Foto Barang</th>
           </tr>
         </thead>
         <tbody id="kirTableBody"></tbody>
       </table>
     </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4" id="paginationControls"></div>
   </div>
 
 <script>
   const sheetID = '1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts';
   const sheetName = 'KIR : RUANGAN KANTOR';
   const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const rowsPerPage = 10;
+  let fullData = [];
+  let currentPage = 1;
+
+  function displayTable(data, page = 1) {
+    const tbody = document.getElementById('kirTableBody');
+    tbody.innerHTML = '';
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    const pageData = data.slice(start, end);
+
+    pageData.forEach((row, idx) => {
+      const tr = document.createElement('tr');
+      const fotoLink = row[6] ? `<a href="${row[6]}" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>` : '-';
+      const values = [
+        start + idx + 1,     // No.
+        row[0],              // Kode Barang (Kolom B)
+        row[1],              // Nama Barang (Kolom C)
+        row[2],              // Informasi Barang (Kolom D)
+        row[3],              // Tanggal Perolehan (Kolom E)
+        row[4],              // Harga Beli Perolehan (Kolom F)
+        row[5],              // Keadaan Barang (Kolom G)
+        fotoLink             // Link Foto Barang (kolom H)
+      ];
+      tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
+      tbody.appendChild(tr);
+    });
+
+    renderPagination(data.length, page);
+  }
+
+  function renderPagination(totalItems, currentPage) {
+    const controls = document.getElementById('paginationControls');
+    const totalPages = Math.ceil(totalItems / rowsPerPage);
+    controls.innerHTML = '';
+
+    const prevBtn = document.createElement('button');
+    prevBtn.innerText = '← Sebelumnya';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
+    prevBtn.onclick = () => {
+      currentPage--;
+      displayTable(fullData, currentPage);
+    };
+
+    const nextBtn = document.createElement('button');
+    nextBtn.innerText = 'Berikutnya →';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.className = 'px-4 py-2 bg-blue-500 text-white rounded disabled:opacity-50';
+    nextBtn.onclick = () => {
+      currentPage++;
+      displayTable(fullData, currentPage);
+    };
+
+    const info = document.createElement('span');
+    info.innerText = `Halaman ${currentPage} dari ${totalPages}`;
+    info.className = 'text-sm';
+
+    controls.appendChild(prevBtn);
+    controls.appendChild(info);
+    controls.appendChild(nextBtn);
+  }
+
+  function filterTable() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = fullData.filter(row => row.some(val => (val || '').toString().toLowerCase().includes(query)));
+    currentPage = 1;
+    displayTable(filtered, currentPage);
+  }
 
   fetch(url)
     .then(res => res.text())
     .then(text => {
       const json = JSON.parse(text.substr(47).slice(0, -2));
       const rows = json.table.rows;
-      const tbody = document.getElementById('kirTableBody');
-
-      rows.forEach((row, idx) => {
-        const cells = row.c || [];
-        const tr = document.createElement('tr');
-
-        const values = [
-          idx + 1,
-          cells[0]?.v || '',
-          cells[1]?.v || '',
-          cells[2]?.v || '',
-          cells[3]?.v || '',
-          cells[4]?.v || '',
-          cells[5]?.v || '',
-          cells[6]?.v || ''
+      // Ambil Kolom B-G => index 1-6
+      fullData = rows.map(row => {
+        const cells = row.c;
+        return [
+          cells[1]?.v || '',  // B
+          cells[2]?.v || '',  // C
+          cells[3]?.v || '',  // D
+          cells[4]?.v || '',  // E
+          cells[5]?.v || '',  // F
+          cells[6]?.v || '',  // G
+          cells[6]?.v || ''   // H sebagai foto
         ];
-
-        tr.innerHTML = values
-          .map(val => `<td class="px-3 py-2 text-sm border">${val}</td>`)
-          .join('');
-        tbody.appendChild(tr);
       });
+      displayTable(fullData, currentPage);
     })
     .catch(err => {
       console.error(err);
