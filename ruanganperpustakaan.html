@@ -16,19 +16,18 @@
       <input id="searchInput" type="text" placeholder="Cari barang..." class="w-full p-2 border rounded" onkeyup="filterTable()"/>
     </div>
 
-    <!-- Tabel Data -->
     <div class="overflow-x-auto">
-      <table class="min-w-full border border-gray-200" id="kirTable">
+      <table class="min-w-full text-sm border border-gray-300" id="asetTable">
         <thead class="bg-gray-200">
           <tr>
-            <th class="px-3 py-2 text-sm border">No</th>
-            <th class="px-3 py-2 text-sm border">Nama Barang / Jenis</th>
-            <th class="px-3 py-2 text-sm border">Merk / Model</th>
-            <th class="px-3 py-2 text-sm border">Nomor Seri</th>
-            <th class="px-3 py-2 text-sm border">Jumlah</th>
-            <th class="px-3 py-2 text-sm border">Harga Perolehan</th>
-            <th class="px-3 py-2 text-sm border">Keadaan Barang</th>
-            <th class="px-3 py-2 text-sm border">Keterangan</th>
+            <th class="px-3 py-2 border">No</th>
+            <th class="px-3 py-2 border">Kode Barang</th>
+            <th class="px-3 py-2 border">Nama Barang</th>
+            <th class="px-3 py-2 border">Informasi Barang</th>
+            <th class="px-3 py-2 border">Tanggal Perolehan</th>
+            <th class="px-3 py-2 border">Harga Beli Perolehan</th>
+            <th class="px-3 py-2 border">Keadaan Barang</th>
+            <th class="px-3 py-2 border">Foto Barang</th>
           </tr>
         </thead>
         <tbody id="kirTableBody"></tbody>
@@ -56,6 +55,7 @@
 
     pageData.forEach((row, idx) => {
       const tr = document.createElement('tr');
+      const fotoLink = row[7] ? `<a href="${row[7]}" target="_blank" class="text-blue-600 hover:underline">🔍 Lihat</a>` : '-';
       const values = [
         start + idx + 1,
         row[0],
@@ -64,9 +64,9 @@
         row[3],
         row[4],
         row[5],
-        row[6]
+        fotoLink
       ];
-      tr.innerHTML = values.map(val => `<td class="px-3 py-2 text-sm border">${val}</td>`).join('');
+      tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
       tbody.appendChild(tr);
     });
 
