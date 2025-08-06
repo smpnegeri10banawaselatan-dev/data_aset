@@ -52,6 +52,21 @@
     return "Rp. " + number.toLocaleString("id-ID");
   }
 
+  function formatTanggal(value) {
+    if (!value || !value.toString().includes("Date")) return value;
+    try {
+      const dateObj = new Date(value);
+      if (isNaN(dateObj)) return value;
+      return dateObj.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      });
+    } catch {
+      return value;
+    }
+  }
+
   function displayTable(data, page = 1) {
     const tbody = document.getElementById('kirTableBody');
     tbody.innerHTML = '';
@@ -70,12 +85,12 @@
       const values = [
         start + idx + 1,
         kodeBarang,
-        row[1],                          // Nama Barang
-        row[2],                          // Informasi
-        row[3],                          // Tanggal
-        formatRupiah(row[4]),           // Harga Beli
-        row[5],                          // Keadaan
-        fotoLink                         // Link ke folder foto
+        row[1],                        // Nama Barang
+        row[2],                        // Info Barang
+        formatTanggal(row[3]),        // Tanggal
+        formatRupiah(row[4]),         // Harga
+        row[5],                        // Keadaan
+        fotoLink                       // Link ke Drive
       ];
 
       tr.innerHTML = values.map(val => `<td class="px-3 py-2 border">${val}</td>`).join('');
@@ -132,12 +147,12 @@
       fullData = rows.map(row => {
         const cells = row.c;
         return [
-          cells[1]?.v || '',  // B - Kode Barang
-          cells[2]?.v || '',  // C - Nama
-          cells[3]?.v || '',  // D - Info
-          cells[4]?.v || '',  // E - Tanggal
-          cells[5]?.v || '',  // F - Harga
-          cells[6]?.v || ''   // G - Keadaan
+          cells[1]?.v || '',  // Kode Barang
+          cells[2]?.v || '',  // Nama
+          cells[3]?.v || '',  // Info
+          cells[4]?.f || cells[4]?.v || '',  // Tanggal (gunakan .f atau .v)
+          cells[5]?.v || '',  // Harga
+          cells[6]?.v || ''   // Keadaan
         ];
       });
       displayTable(fullData, currentPage);
