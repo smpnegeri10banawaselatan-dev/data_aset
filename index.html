@@ -3,78 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard Data Aset SMP Negeri 10 Banawa Selatan </title>
+  <title>Data Aset SMPN 10 Banawa Selatan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+<body class="bg-gray-100 min-h-screen">
 
-  <!-- Sidebar -->
-  <aside class="w-full md:w-64 bg-blue-800 text-white flex flex-col p-6 md:min-h-screen">
-    <h1 class="text-2xl font-bold mb-6">Data Aset SMP Negeri 10 Banawa Selatan </h1>
-    <nav class="space-y-2">
+  <!-- Navbar -->
+  <header class="bg-blue-800 text-white">
+    <div class="container mx-auto flex items-center justify-between p-4">
+      <h1 class="text-xl font-bold">Inventaris SMPN 10 Banawa Selatan</h1>
+      
+      <!-- Hamburger Menu (Mobile) -->
+      <button id="menu-btn" class="md:hidden focus:outline-none">
+        <span class="material-icons">menu</span>
+      </button>
 
-      <!-- Dropdown Menu: KIR -->
-      <div x-data="{ open: false }" class="relative">
-        <button onclick="toggleDropdown()" class="w-full flex justify-between items-center hover:text-blue-300 focus:outline-none">
-          <span>KIR</span>
-          <span class="material-icons transform transition-transform" id="arrowIcon">expand_more</span>
-        </button>
-        <div id="dropdownMenu" class="ml-4 mt-2 hidden flex-col space-y-2">
-          <a href="#kir-kantor" class="hover:text-blue-300">Ruangan Kantor</a>
-          <a href="#kir-perpus" class="hover:text-blue-300">Ruangan Perpustakaan</a>
-        </div>
-      </div>
+      <!-- Menu Items -->
+      <nav id="menu" class="hidden md:flex md:space-x-6">
+        <a href="inventarisasikantor.html" class="hover:text-blue-300">Inventarisasi Ruangan Kantor</a>
+        <a href="ruanganperpustakaan.html" class="hover:text-blue-300">Ruangan Perpustakaan</a>
+      </nav>
+    </div>
 
-      <!-- Menu: QR Code -->
-      <a href="#qr-code" class="hover:text-blue-300 block">QR Code</a>
-    </nav>
-  </aside>
+    <!-- Mobile Menu Dropdown -->
+    <div id="dropdown" class="md:hidden hidden px-4 pb-4 space-y-2 bg-blue-700">
+      <a href="inventarisasikantor.html" class="block hover:text-blue-300">Inventarisasi Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:text-blue-300">Ruangan Perpustakaan</a>
+    </div>
+  </header>
 
   <!-- Main Content -->
-  <main class="flex-1 p-6">
-    <!-- KIR: Ruangan Kantor -->
-    <section id="kir-kantor" class="mb-10">
-      <h2 class="text-xl font-semibold mb-2">📁 KIR: Ruangan Kantor</h2>
-      <p class="mb-2">Data Kartu Identitas Ruangan Kantor bisa di unduh di bawah ini :</p>
-      <a href="https://docs.google.com/spreadsheets/d/1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts/edit#gid=753671869"
-         target="_blank"
-         class="inline-flex items-center text-blue-600 hover:underline">
-        <span class="material-icons mr-1">visibility</span>Lihat Data
-      </a>
-    </section>
-
-    <!-- KIR: Ruangan Perpustakaan -->
-    <section id="kir-perpus" class="mb-10">
-      <h2 class="text-xl font-semibold mb-2">📁 KIR: Ruangan Perpustakaan</h2>
-      <p class="mb-2">Data Kartu Identitas Ruangan Perpustakaan bisa di unduh di bawah ini :</p>
-      <a href="https://docs.google.com/spreadsheets/d/1fQimRhuFVbZ904FHB0KGTMjYFQclCPEqJWQRRUV_Lts/edit#gid=753671869"
-         target="_blank"
-         class="inline-flex items-center text-blue-600 hover:underline">
-        <span class="material-icons mr-1">visibility</span>Lihat Data
-      </a>
-    </section>
-
-    <!-- QR Code -->
-    <section id="qr-code">
-      <h2 class="text-xl font-semibold mb-2">📦 QR Code Inventaris</h2>
-      <p class="mb-2">Data Pendukung Barcode Inventarisasi Ruangan Bisa di lihat di bawah ini :</p>
-      <a href="https://drive.google.com/drive/folders/1T0-um7QuFSWFx14Ma6M6kytu2zX37-hn?usp=drive_link"
-         target="_blank"
-         class="inline-flex items-center text-blue-600 hover:underline">
-        <span class="material-icons mr-1">visibility</span>Lihat Folder
-      </a>
-    </section>
+  <main class="p-6">
+    <h2 class="text-2xl font-semibold mb-4">Selamat Datang di Dashboard Inventaris</h2>
+    <p class="text-gray-700">Silakan pilih menu dari navigasi untuk mengakses data inventaris ruangan.</p>
   </main>
 
-  <!-- Script for Dropdown -->
+  <!-- Toggle Script -->
   <script>
-    function toggleDropdown() {
-      const menu = document.getElementById("dropdownMenu");
-      const icon = document.getElementById("arrowIcon");
-      menu.classList.toggle("hidden");
-      icon.classList.toggle("rotate-180");
-    }
+    const menuBtn = document.getElementById('menu-btn');
+    const dropdown = document.getElementById('dropdown');
+    const menu = document.getElementById('menu');
+
+    menuBtn.addEventListener('click', () => {
+      dropdown.classList.toggle('hidden');
+    });
   </script>
 
 </body>
