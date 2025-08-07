@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Data Aset SMPN 10 Banawa Selatan</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen flex">
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
 
   <!-- Sidebar -->
   <aside class="w-64 bg-blue-800 text-white flex-shrink-0 hidden md:block min-h-screen">
@@ -35,18 +36,78 @@
   </header>
 
   <!-- Main Content -->
-  <main class="flex-1 p-6">
-    <h2 class="text-2xl font-semibold mb-4">Selamat Datang di Dashboard Inventaris</h2>
-    <p class="text-gray-700">Silakan pilih menu dari navigasi untuk mengakses data inventaris ruangan.</p>
+  <main class="flex-1 p-6 space-y-10">
+    <div>
+      <h2 class="text-2xl font-semibold mb-2">Dashboard Inventaris</h2>
+      <p class="text-gray-700">Visualisasi nilai aset berdasarkan jenis barang per ruangan.</p>
+    </div>
+
+    <!-- Chart: Ruangan Kantor -->
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="text-xl font-semibold mb-4 text-blue-700">Aset Ruangan Kantor</h3>
+      <canvas id="chartKantor" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Chart: Perpustakaan -->
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="text-xl font-semibold mb-4 text-green-700">Aset Ruangan Perpustakaan</h3>
+      <canvas id="chartPerpus" class="w-full h-64"></canvas>
+    </div>
   </main>
 
   <!-- Script Toggle Dropdown (Mobile) -->
   <script>
     const menuBtn = document.getElementById('menu-btn');
     const dropdown = document.getElementById('dropdown');
+    menuBtn.addEventListener('click', () => dropdown.classList.toggle('hidden'));
 
-    menuBtn.addEventListener('click', () => {
-      dropdown.classList.toggle('hidden');
+    // Chart 1: Ruangan Kantor
+    const ctxKantor = document.getElementById('chartKantor').getContext('2d');
+    new Chart(ctxKantor, {
+      type: 'bar',
+      data: {
+        labels: ['Kursi', 'Meja', 'Komputer', 'Printer'],
+        datasets: [{
+          label: 'Nilai Aset (Rp)',
+          data: [5000000, 3000000, 12000000, 2500000],
+          backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444']
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              callback: val => 'Rp ' + val.toLocaleString()
+            }
+          }
+        },
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // Chart 2: Perpustakaan
+    const ctxPerpus = document.getElementById('chartPerpus').getContext('2d');
+    new Chart(ctxPerpus, {
+      type: 'bar',
+      data: {
+        labels: ['Buku', 'Meja', 'Rak', 'Komputer'],
+        datasets: [{
+          data: [8000000, 2000000, 4000000, 10000000],
+          backgroundColor: ['#10B981', '#3B82F6', '#F59E0B', '#8B5CF6']
+        }]
+      },
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.label}: Rp ${ctx.parsed.toLocaleString()}`
+            }
+          }
+        }
+      }
     });
   </script>
 
