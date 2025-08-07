@@ -84,6 +84,12 @@
     body {
       padding-top: 1rem;
     }
+
+    .thumbnail {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: contain;
+    }
   </style>
 </head>
 <body>
@@ -180,8 +186,7 @@
         filteredData = [...fullData];
         renderTableHeader();
         renderFilterOptions();
-        renderTable();
-        renderPagination();
+        applyFilters();  // jalankan filter awal supaya data tampil langsung dan filter aktif
       });
 
     function renderTableHeader() {
@@ -287,9 +292,23 @@
       const searchValue = document.getElementById("searchInput").value.toLowerCase();
       const selectedKecamatan = document.getElementById("kecamatanFilter").value.toLowerCase();
 
+      const kecamatanIndex = getKecamatanIndex();
+      const namaSekolahIndex = headers.findIndex(h => h.toLowerCase().includes("nama sekolah"));
+
       filteredData = fullData.filter(row => {
-        const matchesSearch = row.some(cell => cell.toString().toLowerCase().includes(searchValue));
-        const matchesKecamatan = selectedKecamatan === "" || (row[getKecamatanIndex()] || "").toLowerCase() === selectedKecamatan;
+        if (!row) return false;
+
+        // Pencarian hanya pada kolom nama sekolah jika ditemukan, jika tidak cari di semua kolom
+        const matchesSearch = namaSekolahIndex !== -1
+          ? (row[namaSekolahIndex] || "").toString().toLowerCase().includes(searchValue)
+          : row.some(cell => (cell || "").toString().toLowerCase().includes(searchValue));
+
+        let matchesKecamatan = true;
+        if (selectedKecamatan && kecamatanIndex !== -1) {
+          const kecCell = (row[kecamatanIndex] || "").toString().toLowerCase().trim();
+          matchesKecamatan = kecCell === selectedKecamatan;
+        }
+
         return matchesSearch && matchesKecamatan;
       });
 
