@@ -275,6 +275,20 @@
       const pagination = document.getElementById("pagination");
       pagination.innerHTML = "";
 
+      // Tombol Sebelumnya
+      const prevLi = document.createElement("li");
+      prevLi.className = `page-item ${currentPage === 1 ? "disabled" : ""}`;
+      prevLi.innerHTML = `<button class="page-link" aria-label="Previous">&laquo; Sebelumnya</button>`;
+      prevLi.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderTable();
+          renderPagination();
+        }
+      });
+      pagination.appendChild(prevLi);
+
+      // Tombol halaman
       for (let i = 1; i <= totalPages; i++) {
         const li = document.createElement("li");
         li.className = `page-item ${i === currentPage ? "active" : ""}`;
@@ -286,6 +300,19 @@
         });
         pagination.appendChild(li);
       }
+
+      // Tombol Berikutnya
+      const nextLi = document.createElement("li");
+      nextLi.className = `page-item ${currentPage === totalPages ? "disabled" : ""}`;
+      nextLi.innerHTML = `<button class="page-link" aria-label="Next">Berikutnya &raquo;</button>`;
+      nextLi.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderTable();
+          renderPagination();
+        }
+      });
+      pagination.appendChild(nextLi);
     }
 
     function applyFilters() {
