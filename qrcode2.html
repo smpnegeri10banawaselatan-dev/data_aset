@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Data Google Sheets + Preview Dokumen</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    body {
+      padding: 20px;
+    }
+    img.thumbnail {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: cover;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2 class="mb-4">Data Real-time dari Google Sheets</h2>
+
+    <div class="row mb-3">
+      <div class="col-md-6 mb-2">
+        <input type="text" id="searchInput" class="form-control" placeholder="Cari data...">
+      </div>
+      <div class="col-md-6 mb-2">
+        <select id="kecamatanFilter" class="form-select">
+          <option value="">Semua Kecamatan</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead id="tableHead" class="table-light"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <nav>
+      <ul class="pagination justify-content-center" id="pagination"></ul>
+    </nav>
+  </div>
+
+  <!-- Modal Grid Preview -->
+  <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="previewModalLabel">Preview Dokumen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3" id="previewContentRow"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const sheetID = "152oNQyrJEeg-xW3okB2LKbGIUapxDakDMCbDjqpDl3U";
+    const sheetGID = "0";
+    const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=${sheetGID}`;
+
+    let fullData = [];
+    let filteredData = [];
+    let headers = [];
+    let currentPage = 1;
+    const rowsPerPage = 10;
+
+    fetch(sheetURL)
+      .then(res => res.text())
+      .then(text => {
+        const json = JSON.parse(text.substr(47).slice(0, -2));
+        headers = json.table.cols.map(col => col.label);
+        fullData = json.table.rows.map(row => row.c.map(cell => cell ? cell.v : ""));
+        filteredData = [...fullData];
+        renderTableHeader();
+        renderFilterOptions();
+        renderTable();
+        renderPagination();
+      });
+
+    function renderTableHeader() {
+      const thead = document.getElementById("tableHead");
+      thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join('') + "<th>Preview Semua</th></tr>";
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const pageData = filteredData.slice(start, end);
+
+      pageData.forEach(row => {
+        const tr = document.createElement("tr");
+
+        row.forEach((cell, i) => {
+          const td = document.createElement("td");
+          const header = headers[i].toLowerCase();
+          const isDriveLink = typeof cell === "string" && cell.includes("drive.google.com");
+
+          if (isDriveLink && (header.includes("kib") || header.includes("barcode"))) {
+            const fileId = extractDriveFileId(cell);
+            const label = header.includes("kib") ? "Dokumen KIB" : "Dokumen Barcode";
+
+            const thumbnail = `<img src="https://drive.google.com/thumbnail?id=${fileId}" class="thumbnail rounded border" alt="${label}">`;
+            const previewBtn = `<button class="btn btn-sm btn-outline-primary mb-1" onclick="openPreviewModalGrid([{label: '${label}', fileId: '${fileId}'}])">Preview</button>`;
+            const downloadBtn = `<a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" class="btn btn-sm btn-outline-secondary">Unduh <i class="bi bi-download"></i></a>`;
+
+            td.innerHTML = `${thumbnail}<br>${previewBtn} ${downloadBtn}`;
+          } else {
+            td.textContent = cell;
+          }
+
+          tr.appendChild(td);
+        });
+
+        // Tombol "Preview Semua" untuk seluruh file dalam baris
+        const previewAllTd = document.createElement("td");
+        const fileObjs = row
+          .map((cell, i) => {
+            const isDrive = typeof cell === "string" && cell.includes("drive.google.com");
+            if (!isDrive) return null;
+            return { fileId: extractDriveFileId(cell), label: headers[i] };
+          })
+          .filter(Boolean);
+
+        previewAllTd.innerHTML = fileObjs.length
+          ? `<button class="btn btn-sm btn-dark" onclick='openPreviewModalGrid(${JSON.stringify(fileObjs)})'>Preview Semua</button>`
+          : "-";
+
+        tr.appendChild(previewAllTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      for (let i = 1; i <= totalPages; i++) {
+        const li = document.createElement("li");
+        li.className = `page-item ${i === currentPage ? "active" : ""}`;
+        li.innerHTML = `<button class="page-link">${i}</button>`;
+        li.addEventListener("click", () => {
+          currentPage = i;
+          renderTable();
+          renderPagination();
+        });
+        pagination.appendChild(li);
+      }
+    }
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("kecamatanFilter").addEventListener("change", applyFilters);
+
+    function applyFilters() {
+      const searchValue = document.getElementById("searchInput").value.toLowerCase();
+      const selectedKecamatan = document.getElementById("kecamatanFilter").value.toLowerCase();
+
+      filteredData = fullData.filter(row => {
+        const matchesSearch = row.some(cell => cell.toString().toLowerCase().includes(searchValue));
+        const matchesKecamatan = selectedKecamatan === "" || (row[getKecamatanIndex()] || "").toLowerCase() === selectedKecamatan;
+        return matchesSearch && matchesKecamatan;
+      });
+
+      currentPage = 1;
+      renderTable();
+      renderPagination();
+    }
+
+    function renderFilterOptions() {
+      const kecamatanIndex = getKecamatanIndex();
+      const kecamatanSet = new Set(fullData.map(row => row[kecamatanIndex]).filter(Boolean));
+      const select = document.getElementById("kecamatanFilter");
+
+      Array.from(kecamatanSet).sort().forEach(kec => {
+        const option = document.createElement("option");
+        option.value = kec;
+        option.textContent = kec;
+        select.appendChild(option);
+      });
+    }
+
+    function getKecamatanIndex() {
+      return headers.findIndex(h => h.toLowerCase().includes("kecamatan"));
+    }
+
+    function extractDriveFileId(url) {
+      const match = url.match(/[-\w]{25,}/);
+      return match ? match[0] : "";
+    }
+
+    function openPreviewModalGrid(fileObjs) {
+      const container = document.getElementById("previewContentRow");
+      container.innerHTML = "";
+
+      fileObjs.forEach(obj => {
+        const col = document.createElement("div");
+        col.className = "col-md-6";
+
+        col.innerHTML = `
+          <div class="border rounded p-2 shadow-sm">
+            <h6>${obj.label}</h6>
+            <iframe src="https://drive.google.com/file/d/${obj.fileId}/preview" 
+                    class="w-100"
+                    style="height: 600px; border: none;"></iframe>
+          </div>
+        `;
+
+        container.appendChild(col);
+      });
+
+      const modal = new bootstrap.Modal(document.getElementById("previewModal"));
+      modal.show();
+    }
+  </script>
+
+</body>
+</html>
