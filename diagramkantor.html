@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ruangan Kantor - Inventaris SMPN 10</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-blue-800 text-white p-6 hidden md:block">
+    <div class="font-bold text-xl mb-6">Inventaris SMPN 10</div>
+    <nav class="space-y-2">
+      <a href="ruangankantor.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="block hover:bg-blue-700 px-4 py-2 rounded">QR CODE</a>
+    </nav>
+  </aside>
+
+  <!-- Content -->
+  <main class="flex-1 p-6">
+    <h2 class="text-2xl font-semibold mb-4">Data Aset Ruangan Kantor</h2>
+    <p class="mb-6 text-gray-700">Grafik menunjukkan nilai aset per jenis barang (dalam rupiah).</p>
+
+    <div class="bg-white p-4 rounded shadow mb-8">
+      <canvas id="chartKantor" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Contoh tabel atau konten lainnya bisa ditambahkan -->
+  </main>
+
+  <!-- Mobile Navbar -->
+  <header class="bg-blue-800 text-white w-full md:hidden">
+    <div class="flex items-center justify-between p-4">
+      <h1 class="text-lg font-bold">Inventaris SMPN 10</h1>
+      <button id="menu-btn" class="focus:outline-none">
+        <span class="material-icons">menu</span>
+      </button>
+    </div>
+    <div id="dropdown" class="hidden px-4 pb-4 space-y-2 bg-blue-700">
+      <a href="ruangankantor.html" class="block hover:text-blue-300">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:text-blue-300">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="block hover:text-blue-300">QR CODE</a>
+    </div>
+  </header>
+
+  <script>
+    document.getElementById('menu-btn')?.addEventListener('click', () => {
+      document.getElementById('dropdown').classList.toggle('hidden');
+    });
+
+    const ctx = document.getElementById('chartKantor').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Kursi', 'Meja', 'Komputer', 'Printer'],
+        datasets: [{
+          label: 'Nilai Aset (Rp)',
+          data: [5000000, 3000000, 12000000, 2500000],
+          backgroundColor: ['#3B82F6','#10B981','#F59E0B','#EF4444']
+        }]
+      },
+      options: {
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: val => 'Rp ' + val.toLocaleString() } }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  </script>
+
+</body>
+</html>
