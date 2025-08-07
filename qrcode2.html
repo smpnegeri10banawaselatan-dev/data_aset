@@ -3,16 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Data Google Sheets + Preview Dokumen</title>
+  <title>Data Aset SMPN 10 Banawa Selatan</title>
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Material Icons for menu icon -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <style>
     body {
-      padding: 20px;
+      padding-top: 60px;
+    }
+    @media (min-width: 768px) {
+      body {
+        padding-left: 16rem;
+        padding-top: 20px;
+      }
+    }
+    aside {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      z-index: 1030;
     }
     img.thumbnail {
       max-width: 100px;
@@ -24,9 +39,36 @@
 </head>
 <body>
 
+  <!-- Sidebar (Desktop) -->
+  <aside class="w-64 bg-blue-800 text-white flex-shrink-0 hidden md:block">
+    <div class="p-4 font-bold text-xl border-b border-blue-700">Inventaris SMPN 10</div>
+    <nav class="p-4 space-y-2">
+      <a href="ruangankantor.html" class="d-block text-white text-decoration-none hover:bg-blue-700 px-3 py-2 rounded">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="d-block text-white text-decoration-none hover:bg-blue-700 px-3 py-2 rounded">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="d-block text-white text-decoration-none hover:bg-blue-700 px-3 py-2 rounded">QR CODE</a>
+    </nav>
+  </aside>
+
+  <!-- Mobile Navbar -->
+  <header class="bg-blue-800 text-white w-100 fixed-top d-md-none z-3">
+    <div class="d-flex justify-content-between align-items-center p-3">
+      <h1 class="h5 m-0">Inventaris SMPN 10</h1>
+      <button id="menu-btn" class="btn btn-sm text-white">
+        <span class="material-icons">menu</span>
+      </button>
+    </div>
+    <div id="dropdown" class="d-none px-3 pb-3 bg-blue-700">
+      <a href="ruangankantor.html" class="d-block text-white text-decoration-none py-1">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="d-block text-white text-decoration-none py-1">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="d-block text-white text-decoration-none py-1">QR CODE</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
   <div class="container">
     <h2 class="mb-4">Data Aset Peralatan dan Mesin Dinas Pendidikan dan Kebudayaan</h2>
 
+    <!-- Filter -->
     <div class="row mb-3">
       <div class="col-md-6 mb-2">
         <input type="text" id="searchInput" class="form-control" placeholder="Cari data...">
@@ -38,6 +80,7 @@
       </div>
     </div>
 
+    <!-- Tabel -->
     <div class="table-responsive">
       <table class="table table-bordered table-striped align-middle">
         <thead id="tableHead" class="table-light"></thead>
@@ -50,7 +93,7 @@
     </nav>
   </div>
 
-  <!-- Modal Grid Preview -->
+  <!-- Modal Preview Grid -->
   <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen modal-dialog-centered">
       <div class="modal-content">
@@ -65,18 +108,21 @@
     </div>
   </div>
 
-  <!-- Bootstrap Bundle JS -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // Toggle Mobile Menu
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      const dropdown = document.getElementById("dropdown");
+      dropdown.classList.toggle("d-none");
+    });
+
     const sheetID = "152oNQyrJEeg-xW3okB2LKbGIUapxDakDMCbDjqpDl3U";
     const sheetGID = "0";
     const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=${sheetGID}`;
 
-    let fullData = [];
-    let filteredData = [];
-    let headers = [];
-    let currentPage = 1;
+    let fullData = [], filteredData = [], headers = [], currentPage = 1;
     const rowsPerPage = 10;
 
     fetch(sheetURL)
@@ -99,17 +145,11 @@
 
     function getFileTypeIcon(url) {
       const lower = url.toLowerCase();
-      if (lower.includes(".pdf")) {
-        return { icon: "bi-file-earmark-pdf", color: "danger", label: "PDF" };
-      } else if (lower.includes(".doc") || lower.includes(".docx")) {
-        return { icon: "bi-file-earmark-word", color: "primary", label: "Word" };
-      } else if (lower.includes(".xls") || lower.includes(".xlsx")) {
-        return { icon: "bi-file-earmark-excel", color: "success", label: "Excel" };
-      } else if (lower.includes(".jpg") || lower.includes(".jpeg") || lower.includes(".png")) {
-        return { icon: "bi-file-earmark-image", color: "info", label: "Gambar" };
-      } else {
-        return { icon: "bi-file-earmark", color: "secondary", label: "Dokumen" };
-      }
+      if (lower.includes(".pdf")) return { icon: "bi-file-earmark-pdf", color: "danger", label: "PDF" };
+      if (lower.includes(".doc")) return { icon: "bi-file-earmark-word", color: "primary", label: "Word" };
+      if (lower.includes(".xls")) return { icon: "bi-file-earmark-excel", color: "success", label: "Excel" };
+      if (lower.includes(".jpg") || lower.includes(".png")) return { icon: "bi-file-earmark-image", color: "info", label: "Gambar" };
+      return { icon: "bi-file-earmark", color: "secondary", label: "Dokumen" };
     }
 
     function extractDriveFileId(url) {
@@ -126,7 +166,6 @@
 
       pageData.forEach(row => {
         const tr = document.createElement("tr");
-
         row.forEach((cell, i) => {
           const td = document.createElement("td");
           const header = headers[i].toLowerCase();
@@ -135,20 +174,18 @@
           if (isDriveLink) {
             const fileId = extractDriveFileId(cell);
             const fileInfo = getFileTypeIcon(cell);
-            const label = header.includes("kib") ? "📂 Dokumen KIB" : header.includes("barcode") ? "🧾 Dokumen Barcode" : headers[i];
+            const label = header.includes("kib") ? "📂 Dokumen KIB" : header.includes("barcode") ? "🧾 Barcode" : headers[i];
 
-            const thumbnail = `
+            td.innerHTML = `
               <div class="d-flex flex-column align-items-start">
                 <img src="https://drive.google.com/thumbnail?id=${fileId}" class="thumbnail rounded border mb-1" alt="${label}">
                 <span class="badge bg-${fileInfo.color}" data-bs-toggle="tooltip" title="File ${fileInfo.label}">
                   <i class="bi ${fileInfo.icon}"></i> ${fileInfo.label}
                 </span>
+                <button class="btn btn-sm btn-outline-primary mt-2" onclick="openPreviewModalGrid([{label: '${label}', fileId: '${fileId}'}])">Preview</button>
+                <a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1">Unduh <i class="bi bi-download"></i></a>
               </div>
             `;
-            const previewBtn = `<button class="btn btn-sm btn-outline-primary mt-2" onclick="openPreviewModalGrid([{label: '${label}', fileId: '${fileId}'}])">Preview</button>`;
-            const downloadBtn = `<a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1">Unduh <i class="bi bi-download"></i></a>`;
-
-            td.innerHTML = `${thumbnail}<br>${previewBtn} ${downloadBtn}`;
           } else {
             td.textContent = cell;
           }
@@ -156,14 +193,13 @@
           tr.appendChild(td);
         });
 
+        // Preview Semua
         const previewAllTd = document.createElement("td");
-        const fileObjs = row
-          .map((cell, i) => {
-            const isDrive = typeof cell === "string" && cell.includes("drive.google.com");
-            if (!isDrive) return null;
-            return { fileId: extractDriveFileId(cell), label: headers[i] };
-          })
-          .filter(Boolean);
+        const fileObjs = row.map((cell, i) => {
+          const isDrive = typeof cell === "string" && cell.includes("drive.google.com");
+          if (!isDrive) return null;
+          return { fileId: extractDriveFileId(cell), label: headers[i] };
+        }).filter(Boolean);
 
         previewAllTd.innerHTML = fileObjs.length
           ? `<button class="btn btn-sm btn-dark" onclick='openPreviewModalGrid(${JSON.stringify(fileObjs)})'>Preview Semua</button>`
@@ -174,6 +210,13 @@
       });
 
       enableTooltips();
+    }
+
+    function enableTooltips() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     }
 
     function renderPagination() {
@@ -193,16 +236,6 @@
         pagination.appendChild(li);
       }
     }
-
-    function enableTooltips() {
-      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
-    }
-
-    document.getElementById("searchInput").addEventListener("input", applyFilters);
-    document.getElementById("kecamatanFilter").addEventListener("change", applyFilters);
 
     function applyFilters() {
       const searchValue = document.getElementById("searchInput").value.toLowerCase();
@@ -259,6 +292,9 @@
       const modal = new bootstrap.Modal(document.getElementById("previewModal"));
       modal.show();
     }
+
+    document.getElementById("searchInput").addEventListener("input", applyFilters);
+    document.getElementById("kecamatanFilter").addEventListener("change", applyFilters);
   </script>
 
 </body>
