@@ -25,7 +25,7 @@
 <body>
 
   <div class="container">
-    <h2 class="mb-4">Data Real-time dari Google Sheets</h2>
+    <h2 class="mb-4">Data Aset Peralatan dan Mesin Dinas Pendidikan dan Kebudayaan</h2>
 
     <div class="row mb-3">
       <div class="col-md-6 mb-2">
@@ -97,6 +97,26 @@
       thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join('') + "<th>Preview Semua</th></tr>";
     }
 
+    function getFileTypeIcon(url) {
+      const lower = url.toLowerCase();
+      if (lower.includes(".pdf")) {
+        return { icon: "bi-file-earmark-pdf", color: "danger", label: "PDF" };
+      } else if (lower.includes(".doc") || lower.includes(".docx")) {
+        return { icon: "bi-file-earmark-word", color: "primary", label: "Word" };
+      } else if (lower.includes(".xls") || lower.includes(".xlsx")) {
+        return { icon: "bi-file-earmark-excel", color: "success", label: "Excel" };
+      } else if (lower.includes(".jpg") || lower.includes(".jpeg") || lower.includes(".png")) {
+        return { icon: "bi-file-earmark-image", color: "info", label: "Gambar" };
+      } else {
+        return { icon: "bi-file-earmark", color: "secondary", label: "Dokumen" };
+      }
+    }
+
+    function extractDriveFileId(url) {
+      const match = url.match(/[-\w]{25,}/);
+      return match ? match[0] : "";
+    }
+
     function renderTable() {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -112,13 +132,21 @@
           const header = headers[i].toLowerCase();
           const isDriveLink = typeof cell === "string" && cell.includes("drive.google.com");
 
-          if (isDriveLink && (header.includes("kib") || header.includes("barcode"))) {
+          if (isDriveLink) {
             const fileId = extractDriveFileId(cell);
-            const label = header.includes("kib") ? "Dokumen KIB" : "Dokumen Barcode";
+            const fileInfo = getFileTypeIcon(cell);
+            const label = header.includes("kib") ? "📂 Dokumen KIB" : header.includes("barcode") ? "🧾 Dokumen Barcode" : headers[i];
 
-            const thumbnail = `<img src="https://drive.google.com/thumbnail?id=${fileId}" class="thumbnail rounded border" alt="${label}">`;
-            const previewBtn = `<button class="btn btn-sm btn-outline-primary mb-1" onclick="openPreviewModalGrid([{label: '${label}', fileId: '${fileId}'}])">Preview</button>`;
-            const downloadBtn = `<a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" class="btn btn-sm btn-outline-secondary">Unduh <i class="bi bi-download"></i></a>`;
+            const thumbnail = `
+              <div class="d-flex flex-column align-items-start">
+                <img src="https://drive.google.com/thumbnail?id=${fileId}" class="thumbnail rounded border mb-1" alt="${label}">
+                <span class="badge bg-${fileInfo.color}" data-bs-toggle="tooltip" title="File ${fileInfo.label}">
+                  <i class="bi ${fileInfo.icon}"></i> ${fileInfo.label}
+                </span>
+              </div>
+            `;
+            const previewBtn = `<button class="btn btn-sm btn-outline-primary mt-2" onclick="openPreviewModalGrid([{label: '${label}', fileId: '${fileId}'}])">Preview</button>`;
+            const downloadBtn = `<a href="https://drive.google.com/uc?export=download&id=${fileId}" target="_blank" class="btn btn-sm btn-outline-secondary mt-1">Unduh <i class="bi bi-download"></i></a>`;
 
             td.innerHTML = `${thumbnail}<br>${previewBtn} ${downloadBtn}`;
           } else {
@@ -128,7 +156,6 @@
           tr.appendChild(td);
         });
 
-        // Tombol "Preview Semua" untuk seluruh file dalam baris
         const previewAllTd = document.createElement("td");
         const fileObjs = row
           .map((cell, i) => {
@@ -143,9 +170,10 @@
           : "-";
 
         tr.appendChild(previewAllTd);
-
         tbody.appendChild(tr);
       });
+
+      enableTooltips();
     }
 
     function renderPagination() {
@@ -164,6 +192,13 @@
         });
         pagination.appendChild(li);
       }
+    }
+
+    function enableTooltips() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     }
 
     document.getElementById("searchInput").addEventListener("input", applyFilters);
@@ -199,11 +234,6 @@
 
     function getKecamatanIndex() {
       return headers.findIndex(h => h.toLowerCase().includes("kecamatan"));
-    }
-
-    function extractDriveFileId(url) {
-      const match = url.match(/[-\w]{25,}/);
-      return match ? match[0] : "";
     }
 
     function openPreviewModalGrid(fileObjs) {
