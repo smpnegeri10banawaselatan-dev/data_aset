@@ -175,7 +175,7 @@
     const sheetURL = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?tqx=out:json&gid=${sheetGID}`;
 
     let fullData = [], filteredData = [], headers = [], currentPage = 1;
-    const rowsPerPage = 10;
+    const rowsPerPage = 40;
 
     fetch(sheetURL)
       .then(res => res.text())
