@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ruangan Perpustakaan - Inventaris SMPN 10</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col md:flex-row">
+
+  <aside class="w-64 bg-blue-800 text-white p-6 hidden md:block">
+    <div class="font-bold text-xl mb-6">Inventaris SMPN 10</div>
+    <nav class="space-y-2">
+      <a href="ruangankantor.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:bg-blue-700 px-4 py-2 rounded">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="block hover:bg-blue-700 px-4 py-2 rounded">QR CODE</a>
+    </nav>
+  </aside>
+
+  <main class="flex-1 p-6">
+    <h2 class="text-2xl font-semibold mb-4">Data Aset Perpustakaan</h2>
+    <p class="mb-6 text-gray-700">Grafik menunjukkan nilai aset per jenis barang di perpustakaan.</p>
+
+    <div class="bg-white p-4 rounded shadow mb-8">
+      <canvas id="chartPerpus" class="w-full h-64"></canvas>
+    </div>
+
+    <!-- Tambahkan konten lainnya jika perlu -->
+  </main>
+
+  <header class="bg-blue-800 text-white w-full md:hidden">
+    <div class="flex items-center justify-between p-4">
+      <h1 class="text-lg font-bold">Inventaris SMPN 10</h1>
+      <button id="menu-btn2" class="focus:outline-none"><span class="material-icons">menu</span></button>
+    </div>
+    <div id="dropdown2" class="hidden px-4 pb-4 space-y-2 bg-blue-700">
+      <a href="ruangankantor.html" class="block hover:text-blue-300">Ruangan Kantor</a>
+      <a href="ruanganperpustakaan.html" class="block hover:text-blue-300">Ruangan Perpustakaan</a>
+      <a href="qrcode2.html" class="block hover:text-blue-300">QR CODE</a>
+    </div>
+  </header>
+
+  <script>
+    document.getElementById('menu-btn2')?.addEventListener('click', () => {
+      document.getElementById('dropdown2').classList.toggle('hidden');
+    });
+
+    const ctx2 = document.getElementById('chartPerpus').getContext('2d');
+    new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: ['Buku', 'Meja', 'Rak', 'Komputer'],
+        datasets: [{
+          label: 'Nilai Aset (Rp)',
+          data: [8000000, 2000000, 4000000, 10000000],
+          backgroundColor: ['#10B981','#3B82F6','#F59E0B','#8B5CF6']
+        }]
+      },
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: ctx => `Rp ${ctx.parsed.toLocaleString()}`
+            }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>
